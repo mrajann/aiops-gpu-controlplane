@@ -1,0 +1,17 @@
+model_list:
+  - model_name: qwen-7b-instruct
+    litellm_params:
+      model: openai/qwen-7b-instruct
+      # Points to your remote GPU pod running vLLM over a secure tunnel or direct IP
+      api_base: "http://${RUNPOD_GPU_HOST:-127.0.0.1}:8000/v1"
+      api_key: "dummy-vllm-key"
+
+general_settings:
+  # Enforces that all incoming management and proxy calls require the master key
+  master_key: os.environ/LITELLM_MASTER_KEY
+  master_key_auth: true
+  disable_master_key_return: true
+
+litellm_settings:
+  drop_params: true
+  set_verbose: false

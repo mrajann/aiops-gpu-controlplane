@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # LiteLLM AI Gateway Control Plane
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: aiops-litellm-gateway
+    restart: unless-stopped
+    ports:
+      # CRITICAL SECURITY: Bind strictly to 127.0.0.1. Never use "4000:4000" alone.
+      - "127.0.0.1:4000:4000"
+    volumes:
+      - ../config/litellm/config.yaml:/app/config.yaml
+    environment:
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
+      - LITELLM_SALT_KEY=${LITELLM_SALT_KEY}
+      - DATABASE_URL=postgresql://litellm_user:secure_db_password@postgres:5432/litellm_db
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    depends_on:
+      - postgres
+
+  # Secure Local Database for LiteLLM State & Virtual Key Management
+  postgres:
+    image: postgres:15-alpine
+    container_name: aiops-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: litellm_user
+      POSTGRES_PASSWORD: secure_db_password
+      POSTGRES_DB: litellm_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # No ports exposed to host interface at all—internal container network only!
+
+  # Prometheus Telemetry Collector
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: aiops-prometheus
+    restart: unless-stopped
+    ports:
+      # CRITICAL SECURITY: Bind strictly to localhost
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ../config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+
+volumes:
+  postgres_data:
