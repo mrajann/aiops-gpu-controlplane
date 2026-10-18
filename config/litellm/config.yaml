@@ -5,6 +5,9 @@ model_list:
       # Points to your remote GPU pod running vLLM over a secure tunnel or direct IP
       api_base: "http://${RUNPOD_GPU_HOST:-127.0.0.1}:8000/v1"
       api_key: "dummy-vllm-key"
+      #phase 5 - baseline throughput limits
+      rpm: 60
+      tpm: 60000      
 
 general_settings:
   # Enforces that all incoming management and proxy calls require the master key
@@ -15,3 +18,9 @@ general_settings:
 litellm_settings:
   drop_params: true
   set_verbose: false
+
+# Router settings phase 5 - enforce global router behavior
+router_settings:
+  routing_strategy: usage-based-routing
+  num_retries: 2
+  timeout: 30
