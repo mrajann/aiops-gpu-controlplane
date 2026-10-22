@@ -7,7 +7,13 @@ model_list:
       api_key: "dummy-vllm-key"
       #phase 5 - baseline throughput limits
       rpm: 60
-      tpm: 60000      
+      tpm: 60000
+  # Fallback Target: Standby replica or secondary failover endpoint
+  - model_name: qwen-7b-fallback
+    litellm_params:
+      model: openai/Qwen/Qwen2.5-7B-Instruct
+      api_base: http://host.docker.internal:8000/v1
+      api_key: os.environ/VLLM_API_KEY      
 
 general_settings:
   # Enforces that all incoming management and proxy calls require the master key
@@ -24,3 +30,8 @@ router_settings:
   routing_strategy: usage-based-routing
   num_retries: 2
   timeout: 30
+  # Router settings phase 6 - fallback options
+  allowed_fails: 2
+  cooldown_time: 30
+  fallbacks:
+    - qwen-7b-instruct: ["qwen-7b-fallback"]
