@@ -1,6 +1,18 @@
+# Environment & Secrets
 .env
+*.env
+.DS_Store
+
+# Python Artifacts
 __pycache__/
-*.pyc
-venv/
+*.py[cod]
+*$py.class
+.venv/
+env/
+dist/
+build/
+*.egg-info/
+
+# Docker Volumes & State
+deployments/postgres_data/
 prometheus_data/
-postgres_data/
